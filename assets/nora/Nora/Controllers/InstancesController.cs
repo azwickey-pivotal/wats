@@ -98,6 +98,33 @@ namespace nora.Controllers
                 });
             }
         }
+        
+        [Route("~/secure-curl/{host}/{port}")]
+        [HttpGet]
+        public IHttpActionResult Curls(string host, int port)
+        {
+            var req = WebRequest.Create("https://" + host + ":" + port);
+            req.Timeout = 1000;
+            try
+            {
+                var resp = (HttpWebResponse)req.GetResponse();
+                return Json(new
+                {
+                    stdout = new StreamReader(resp.GetResponseStream()).ReadToEnd(),
+                    return_code = 0,
+                });
+            }
+            catch (WebException ex)
+            {
+                return Json(new
+                {
+                    stderr = ex.Message,
+                    // ex.Response != null if the response status code wasn't a success,
+                    // null if the operation timedout
+                    return_code = ex.Response != null ? 0 : 1,
+                });
+            }
+        }
 
         [Route("~/env/{name}")]
         [HttpGet]
