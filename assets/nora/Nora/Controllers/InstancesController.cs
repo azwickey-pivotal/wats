@@ -98,20 +98,23 @@ namespace nora.Controllers
                 });
             }
         }
-        
-        [Route("~/secure-curl/{host}/{port}")]
+
+        [Route("~/secure-curl/{host}")]
         [HttpGet]
-        public IHttpActionResult Curls(string host, int port)
+        public IHttpActionResult Curls(string host)
         {
-            var req = WebRequest.Create("https://" + host + ":" + port);
+            var req = WebRequest.Create("https://" + host);
             req.Timeout = 1000;
             try
             {
+                System.Console.WriteLine("Connecting Securely to: " + host);
                 var resp = (HttpWebResponse)req.GetResponse();
                 return Json(new
                 {
                     stdout = new StreamReader(resp.GetResponseStream()).ReadToEnd(),
                     return_code = 0,
+                    Request-Headers = req.Headers,
+                    Response-Headers = resp.Headers
                 });
             }
             catch (WebException ex)
